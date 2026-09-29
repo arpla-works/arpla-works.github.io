@@ -1,0 +1,159 @@
+[
+  {
+    "id": "w01",
+    "issue": "ai",
+    "title": "Sun",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "幻想"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w01.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w07",
+    "issue": "ana",
+    "title": "ヤドカリ夫婦",
+    "author": "鳥居骨丸",
+    "year": 2026,
+    "genres": [
+      "ミステリー"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w07.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w02",
+    "issue": "ai",
+    "title": "Literature",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "実験"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w02.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w03",
+    "issue": "ai",
+    "title": "寝正月",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "私小説"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w03.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w08",
+    "issue": "ana",
+    "title": "太陽の音",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "幻想"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w08.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w04",
+    "issue": "ai",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "恋愛"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w04.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w09",
+    "issue": "ana",
+    "title": "Moon",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "実験"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w09.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w10",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "ミステリー"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w10.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w05",
+    "issue": "ai",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "ミステリー"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w05.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w11",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "私小説"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w11.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w12",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "恋愛"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w12.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "w06",
+    "issue": "ai",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "恋愛",
+      "幻想"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "texts/w06.txt",
+    "bodyMode": "full"
+  }
+]
