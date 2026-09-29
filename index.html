@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("tanpen-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>作品一覧｜思想・哲学・文学・芸術の会</title>
 <meta name="description" content="思想・哲学・文学・芸術の会の文芸同人誌に収録された短編の一覧です。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,10 +18,16 @@
       <p class="org latin" id="org">Association of Religion and Philosophy and Literature and Art.</p>
       <h1 id="page-title">作品一覧</h1>
     </div>
-    <nav aria-label="サイト内">
-      <a href="#works">作品</a>
-      <a href="#issues">収録誌</a>
-    </nav>
+    <div class="header-tools">
+      <nav aria-label="サイト内">
+        <a href="#works">作品</a>
+        <a href="#issues">収録誌</a>
+      </nav>
+      <div class="toggle theme-toggle" role="group" aria-label="背景色">
+        <button type="button" data-theme-value="dark" aria-pressed="true">黒</button>
+        <button type="button" data-theme-value="light" aria-pressed="false">白</button>
+      </div>
+    </div>
   </header>
 
   <section class="filters" aria-label="絞り込み">

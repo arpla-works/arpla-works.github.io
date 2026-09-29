@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("tanpen-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>作品｜思想・哲学・文学・芸術の会</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +17,10 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
       作品一覧へ
     </a>
+    <div class="toggle theme-toggle" role="group" aria-label="背景色">
+      <button type="button" data-theme-value="dark" aria-pressed="true">黒</button>
+      <button type="button" data-theme-value="light" aria-pressed="false">白</button>
+    </div>
   </div>
   <div id="content"></div>
 </div>

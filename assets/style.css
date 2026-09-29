@@ -59,6 +59,7 @@ img { max-width: 100%; display: block; }
 .site-header h1 { margin: 0; font-size: 44px; font-weight: 600; letter-spacing: 0.08em; line-height: 1.2; }
 .site-header nav { display: flex; gap: 32px; font-size: 16px; }
 .site-header nav a { text-decoration: none; }
+.header-tools { display: flex; align-items: center; gap: 32px; flex-shrink: 0; }
 @media (max-width: 699px) {
   .site-header { margin-bottom: 24px; padding-bottom: 18px; }
   .site-header .org { font-size: 12px; margin-bottom: 8px; }

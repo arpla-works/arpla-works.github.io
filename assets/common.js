@@ -2,6 +2,34 @@
 (function () {
   "use strict";
 
+  /* 背景の黒／白。訪問者の選択（localStorage）を site.json の theme より優先する。
+     保存済みの選択は各HTMLの head 内スクリプトが描画前に反映している。 */
+  const THEME_KEY = "tanpen-theme";
+
+  function savedTheme() {
+    try {
+      const t = localStorage.getItem(THEME_KEY);
+      return t === "dark" || t === "light" ? t : null;
+    } catch (e) { return null; }
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    document.querySelectorAll(".theme-toggle button").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b.dataset.themeValue === theme));
+    });
+  }
+
+  applyTheme(savedTheme() || document.documentElement.dataset.theme);
+  document.querySelectorAll(".theme-toggle button").forEach((b) => {
+    b.addEventListener("click", () => {
+      try { localStorage.setItem(THEME_KEY, b.dataset.themeValue); } catch (e) { /* 保存できなくても表示は切り替える */ }
+      applyTheme(b.dataset.themeValue);
+    });
+  });
+  // 別のタブで切り替えたときも合わせる
+  window.addEventListener("storage", (e) => { if (e.key === THEME_KEY && savedTheme()) applyTheme(savedTheme()); });
+
   async function getJSON(path) {
     const res = await fetch(path, { cache: "no-cache" });
     if (!res.ok) throw new Error(path + " を読み込めませんでした（" + res.status + "）");
@@ -14,7 +42,7 @@
       getJSON("data/issues.json"),
       getJSON("data/works.json"),
     ]);
-    document.documentElement.dataset.theme = site.theme === "light" ? "light" : "dark";
+    applyTheme(savedTheme() || (site.theme === "light" ? "light" : "dark"));
     const issueById = {};
     issues.forEach((i) => { issueById[i.id] = i; });
     return { site, issues, works, issueById };
