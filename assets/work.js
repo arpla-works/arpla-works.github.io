@@ -34,7 +34,11 @@
           "</div></div>" +
         (text == null
           ? '<p class="text-note">本文を読み込めませんでした。</p>'
-          : '<div class="text ' + mode + '" id="text" lang="ja">' + renderText(text) + "</div>") +
+          : '<div class="text-frame ' + mode + '" id="text-frame"><div class="text ' + mode + '" id="text" lang="ja">' +
+              // 縦書きのときだけ、本文の頭（いちばん右）に扉のような作品名・著者名を出す
+              '<div class="text-head" aria-hidden="true"><p class="text-title">' + T.esc(w.title) + "</p>" +
+              '<p class="text-author">' + T.esc(w.author) + "</p></div>" +
+              renderText(text) + "</div></div>") +
         (w.bodyMode === "excerpt"
           ? '<p class="text-note">続きは『' + T.esc(i.title) + "』でお読みいただけます。" + (dist ? "　" + dist : "") + "</p>"
           : "");
@@ -64,15 +68,44 @@
           : "") +
       "</div>";
 
+    const t = document.getElementById("text");
+    const frame = document.getElementById("text-frame");
+    if (t) {
+      t.addEventListener("scroll", updateFade, { passive: true });
+      window.addEventListener("resize", updateFade);
+      if (t.classList.contains("vertical")) scrollToStart();
+    }
+
     content.querySelectorAll(".toggle button").forEach((b) => {
       b.addEventListener("click", () => {
         const m = b.dataset.mode;
         localStorage.setItem(MODE_KEY, m);
         content.querySelectorAll(".toggle button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-        const t = document.getElementById("text");
-        if (t) { t.classList.remove("horizontal", "vertical"); t.classList.add(m); }
+        if (t) {
+          [t, frame].forEach((el) => { el.classList.remove("horizontal", "vertical"); el.classList.add(m); });
+          if (m === "vertical") scrollToStart(); else updateFade();
+        }
       });
     });
+
+    /* 縦書きの本文欄を冒頭（いちばん右）に合わせる。
+       scrollLeft の始点はブラウザで 0 だったり負の値だったりするので、決め打ちせず
+       「先頭の要素の右端」と「本文欄の内側の右端」のずれだけ動かす。本文欄の中だけを動かし、ページは動かさない */
+    function scrollToStart() {
+      const first = t.firstElementChild;
+      const box = t.getBoundingClientRect();
+      const padRight = parseFloat(getComputedStyle(t).paddingRight) || 0;
+      t.scrollLeft += first.getBoundingClientRect().right - (box.right - padRight);
+      updateFade();
+    }
+
+    /* 左端（続き側）のグラデーションは、まだ左に続きがあるときだけ出す */
+    function updateFade() {
+      const last = t.lastElementChild;
+      const more = t.classList.contains("vertical") && last &&
+        last.getBoundingClientRect().left < t.getBoundingClientRect().left - 1;
+      frame.classList.toggle("has-more", !!more);
+    }
   }).catch((err) => T.showError(content, err));
 
   /* 本文テキスト → HTML

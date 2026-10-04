@@ -209,16 +209,30 @@ img { max-width: 100%; display: block; }
 
 .text { font-size: 18px; line-height: 2; letter-spacing: 0.02em; }
 .text p { margin: 0; }
-.text p.blank { height: 1em; }
+.text p.blank { block-size: 1em; }  /* 論理プロパティなので縦書きでも一行空きになる */
 .text ruby rt { font-size: 0.5em; }
 .text.horizontal { max-width: 36em; margin: 0 auto; }
+.text.horizontal .text-head { display: none; }
+/* 縦書き：本文欄の幅にきっちり収め、欄の中だけを横にスクロールする */
+.text-frame { position: relative; }
 .text.vertical {
   writing-mode: vertical-rl;
+  width: 100%; max-width: 100%;
   height: min(75vh, 44em);
   overflow-x: auto; overflow-y: hidden;
   line-height: 1.9;
-  padding: 8px 4px 16px;
+  padding: 16px 20px 20px;
 }
+.text-head { margin-block-end: 1.9em; }
+.text-head p { margin: 0; }
+.text-title { font-size: 1.4em; font-weight: 600; letter-spacing: 0.08em; }
+.text-author { font-size: 0.95em; text-align: end; }
+.text-frame::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40px;
+  background: linear-gradient(to right, var(--ground), transparent);
+  pointer-events: none; opacity: 0; transition: opacity 0.2s;
+}
+.text-frame.has-more::after { opacity: 1; }
 @media (max-width: 699px) { .text { font-size: 17px; } }
 .text-note { max-width: 36em; margin: 40px auto 0; color: var(--muted); font-size: 15px; }
 
