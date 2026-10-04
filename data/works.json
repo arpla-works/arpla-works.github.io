@@ -14,6 +14,19 @@
     "bodyMode": "full"
   },
   {
+    "id": "ana-01",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "幻想"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "",
+    "bodyMode": "none"
+  },
+  {
     "id": "ai-02",
     "issue": "ai",
     "title": "鎖を解く風",
@@ -40,6 +53,19 @@
     "bodyMode": "full"
   },
   {
+    "id": "ana-02",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "ミステリー"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "",
+    "bodyMode": "none"
+  },
+  {
     "id": "ai-04",
     "issue": "ai",
     "title": "老莱子",
@@ -53,6 +79,32 @@
     "bodyMode": "full"
   },
   {
+    "id": "ana-03",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "恋愛"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "",
+    "bodyMode": "none"
+  },
+  {
+    "id": "ana-04",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "歴史"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "",
+    "bodyMode": "none"
+  },
+  {
     "id": "ai-05",
     "issue": "ai",
     "title": "唾棄すべき物について",
@@ -64,6 +116,32 @@
     "synopsis": "悪、醜、そして死――この世に確かに存在する「唾棄すべきもの」は、なぜ存在するのか。旧字旧仮名で綴られる思索は、それらを批判し、軽蔑し、そして究極的には愛することを通して、その正体に迫っていく。",
     "body": "texts/ai-05.txt",
     "bodyMode": "full"
+  },
+  {
+    "id": "ana-05",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "思想"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "",
+    "bodyMode": "none"
+  },
+  {
+    "id": "ana-06",
+    "issue": "ana",
+    "title": "[作品名]",
+    "author": "[著者名]",
+    "year": 2026,
+    "genres": [
+      "SF"
+    ],
+    "synopsis": "[あらすじ・作品紹介]",
+    "body": "",
+    "bodyMode": "none"
   },
   {
     "id": "ai-06",
