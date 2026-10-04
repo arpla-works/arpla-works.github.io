@@ -81,16 +81,22 @@ IND_KEYS = ("left", "leftChars", "start", "startChars", "firstLine", "firstLineC
 
 
 def indent_chars(ind):
-    """段落の1行目の字下げ量を「文字数」で返す（左インデント＋1行目インデント）"""
+    """段落の1行目の字下げ量を「文字数」で返す。
+    1行目インデントは四捨五入して数える。左インデント（段落全体を下げる指定）は、文字数で指定されていれば四捨五入、
+    mm などの長さで指定されていれば端数を切り捨てて足す
+    （見出しの「左0.8字ぶんの長さ＋1行目1字」が2字下げにならず、Word上の見た目どおり1字下げになるように）"""
     def amount(chars_key, twips_key):
         if chars_key in ind:
             return int(ind[chars_key]) / 100
         if twips_key in ind:
             return int(ind[twips_key]) / 210  # 10.5pt 前後の本文を想定した概算
         return 0
+    if amount("hangingChars", "hanging") > 0:
+        return 0
     left = amount("leftChars", "left") or amount("startChars", "start")
-    first = amount("firstLineChars", "firstLine") - amount("hangingChars", "hanging")
-    return max(0, round(left + first))
+    left_in_chars = "leftChars" in ind or "startChars" in ind
+    first = amount("firstLineChars", "firstLine")
+    return max(0, (round(left) if left_in_chars else int(left + 0.05)) + round(first))
 
 
 def parents_of(root):
@@ -171,8 +177,11 @@ def extract(doc, table):
             if sp is not None:
                 explicit_sp = {k[len(W):]: v for k, v in sp.attrib.items()}
         ind = style_attr(table, sid, "ind", IND_KEYS)
-        # 段落に直接書かれた値で上書きする（「文字数」指定が twips 指定より優先されるのは indent_chars 側で扱う）
-        ind.update(explicit_ind)
+        # 段落に直接書かれた値で上書きする。段落側が twips だけで指定していれば、スタイル側の「文字数」指定は使わない
+        for k, v in explicit_ind.items():
+            ind[k] = v
+            if not k.endswith("Chars") and k + "Chars" not in explicit_ind:
+                ind.pop(k + "Chars", None)
         sp = style_attr(table, sid, "spacing", ("before", "beforeLines", "after", "afterLines"))
         sp.update(explicit_sp)
         before = int(sp.get("before", 0)) if not sp.get("beforeLines") else int(sp["beforeLines"]) * 2.4
