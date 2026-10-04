@@ -149,7 +149,7 @@
       "</div>" +
       '<div class="preview-body">' +
         "<h2>『" + T.esc(w.title) + "』</h2>" +
-        '<dl class="facts"><dt>著者</dt><dd>' + T.filterLink("author", w.author) + "</dd><dt>制作年</dt><dd>" + T.filterLink("year", w.year) +
+        '<dl class="facts"><dt>著者</dt><dd>' + T.filterLink("author", w.author, T.authorHTML(w)) + "</dd><dt>制作年</dt><dd>" + T.filterLink("year", w.year) +
         "</dd><dt>ジャンル</dt><dd>" + T.esc(w.genres.join("・")) + "</dd></dl>" +
         (w.synopsis ? '<p class="synopsis">' + T.esc(w.synopsis) + "</p>" : "") +
       "</div>" +

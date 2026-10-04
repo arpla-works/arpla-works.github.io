@@ -84,6 +84,8 @@ if works:
             errors.append(f"{where}: id は半角英小文字・数字・ハイフンのみ")
         if w.get("issue") and w["issue"] not in issue_ids:
             errors.append(f"{where}: issue '{w['issue']}' は issues.json にありません")
+        if "authorRuby" in w and not isinstance(w["authorRuby"], str):
+            errors.append(f"{where}: authorRuby（著者名の読み）は文字列")
         if not isinstance(w.get("genres", []), list):
             errors.append(f"{where}: genres は配列 [\"...\"]")
         if w.get("bodyMode") not in ("full", "excerpt", "none"):

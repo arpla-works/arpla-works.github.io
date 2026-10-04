@@ -314,7 +314,10 @@ def main():
 
     entries = []
     for n, (title, author, chunk) in enumerate(works, 1):
-        author = re.sub(r"｜([^《]+)《[^》]+》", r"\1", author)  # 著者名のルビは外す
+        # 著者名全体にルビ（｜親文字《よみ》）なら読みを authorRuby に、それ以外のルビは外す
+        whole = re.fullmatch(r"｜([^｜《》]+)《([^《》]+)》", author)
+        author_ruby = whole.group(2) if whole else ""
+        author = whole.group(1) if whole else re.sub(r"｜([^《]+)《[^》]+》", r"\1", author)
         wid = f"{a.issue}-{n:02d}"
         text = apply_rules(wid, to_text(chunk), rules)
         rubies = len(re.findall(r"｜[^《]+《[^》]+》", text))
@@ -326,6 +329,8 @@ def main():
                 f.write(text)
         entries.append({"id": wid, "issue": a.issue, "title": title, "author": author, "year": year,
                         "genres": [], "synopsis": "", "body": f"texts/{wid}.txt", "bodyMode": "full"})
+        if author_ruby:
+            entries[-1]["authorRuby"] = author_ruby
 
     if a.dry_run:
         print("（dry-run：ファイルは書き込んでいません）")
@@ -345,7 +350,7 @@ def main():
     for e in entries:
         old = before.get(e["id"])
         if old and real(old.get("title")):  # 作品名が仮の値のサンプル作品からは何も引き継がない
-            for k in ("author", "year", "genres", "synopsis", "bodyMode"):
+            for k in ("author", "authorRuby", "year", "genres", "synopsis", "bodyMode"):
                 if real(old.get(k)):
                     e[k] = old[k]
                     if e["id"] not in kept:

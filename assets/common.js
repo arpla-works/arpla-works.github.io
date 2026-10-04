@@ -64,11 +64,51 @@
     return "文芸同人誌" + issue.number + "号　" + formatDate(issue.date);
   }
 
+  /* 縦中横：縦書きで横倒しになる短い数字・記号を <span class="tcy"> で包む（CSS は縦書きのときだけ効く）。
+     ・前後が半角英数字でない、1〜2桁の半角数字（2026 のような3桁以上や A1・URL 中の数字は対象外）
+     ・前後が全角数字でない、単独の全角数字
+     ・!! !? ?! ?? と ‼ ⁉ ⁈ ⁇（直後の異体字セレクタは取り除く）
+     先読み・後読みを使わず、英数字の連なり（URL はまるごと）ごとに判定する */
+  const TCY_RE = /https?:\/\/[^\s　]+|[0-9A-Za-z]+|[０-９]+|!!|!\?|\?!|\?\?|[‼⁉⁈⁇][\uFE0E\uFE0F]?/g;
+  function tcyHTML(str) {
+    str = String(str == null ? "" : str);
+    let out = "", last = 0, m;
+    TCY_RE.lastIndex = 0;
+    while ((m = TCY_RE.exec(str))) {
+      const t = m[0];
+      const hit = /^[0-9]{1,2}$/.test(t) || /^[０-９]$/.test(t) || /^[!?]{2}$/.test(t) || /^[‼⁉⁈⁇]/.test(t);
+      out += esc(str.slice(last, m.index)) + (hit ? '<span class="tcy">' + esc(t.replace(/[\uFE0E\uFE0F]/g, "")) + "</span>" : esc(t));
+      last = m.index + t.length;
+    }
+    return out + esc(str.slice(last));
+  }
+
+  /* 本文1行 → HTML。ルビ（｜親文字《よみ》／漢字《よみ》）と縦中横を処理する */
+  const KANJI = "[々〆〇ヶ\\u3400-\\u4DBF\\u4E00-\\u9FFF\\uF900-\\uFAFF]";
+  const RUBY_RE = new RegExp("｜([^｜《》\\n]+?)《([^《》\\n]+?)》|(" + KANJI + "+)《([^《》\\n]+?)》", "g");
+  function lineHTML(line) {
+    let out = "", last = 0, m;
+    RUBY_RE.lastIndex = 0;
+    while ((m = RUBY_RE.exec(line))) {
+      out += tcyHTML(line.slice(last, m.index)) +
+        "<ruby>" + tcyHTML(m[1] || m[3]) + "<rt>" + tcyHTML(m[2] || m[4]) + "</rt></ruby>";
+      last = m.index + m[0].length;
+    }
+    return out + tcyHTML(line.slice(last));
+  }
+
+  /* 著者名。authorRuby があればふりがなを付ける（一覧タイルの小さな説明行では使わない） */
+  function authorHTML(work) {
+    return work.authorRuby
+      ? "<ruby>" + tcyHTML(work.author) + "<rt>" + esc(work.authorRuby) + "</rt></ruby>"
+      : tcyHTML(work.author);
+  }
+
   /* 著者・制作年の絞り込みリンク（index.html?author=… / ?year=…）。
      一覧ページでは list.js がクリックを受けて、ほかの絞り込みと掛け合わせる */
-  function filterLink(key, value) {
+  function filterLink(key, value, labelHTML) {
     return '<a class="meta-link" href="index.html?' + key + "=" + encodeURIComponent(value) +
-      '" data-filter="' + key + '" data-value="' + esc(value) + '">' + esc(value) + "</a>";
+      '" data-filter="' + key + '" data-value="' + esc(value) + '">' + (labelHTML || esc(value)) + "</a>";
   }
 
   /* 正方形タイル（円）。絵と作品名が作品ページへのリンク、説明行はリンクの外 */
@@ -99,5 +139,5 @@
       "<br>ファイルを直接開いている場合は、ローカルサーバー経由で表示してください（README参照）。</p>";
   }
 
-  window.Tanpen = { loadAll, esc, formatDate, issueMeta, filterLink, tileHTML, shuffle, showError };
+  window.Tanpen = { loadAll, esc, formatDate, issueMeta, tcyHTML, lineHTML, authorHTML, filterLink, tileHTML, shuffle, showError };
 })();

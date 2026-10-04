@@ -36,8 +36,8 @@
           ? '<p class="text-note">本文を読み込めませんでした。</p>'
           : '<div class="text-frame ' + mode + '" id="text-frame"><div class="text ' + mode + '" id="text" lang="ja">' +
               // 縦書きのときだけ、本文の頭（いちばん右）に扉のような作品名・著者名を出す
-              '<div class="text-head" aria-hidden="true"><p class="text-title">' + T.esc(w.title) + "</p>" +
-              '<p class="text-author">' + T.esc(w.author) + "</p></div>" +
+              '<div class="text-head" aria-hidden="true"><p class="text-title">' + T.tcyHTML(w.title) + "</p>" +
+              '<p class="text-author">' + T.authorHTML(w) + "</p></div>" +
               renderText(text) + "</div></div>") +
         (w.bodyMode === "excerpt"
           ? '<p class="text-note">続きは『' + T.esc(i.title) + "』でお読みいただけます。" + (dist ? "　" + dist : "") + "</p>"
@@ -51,7 +51,7 @@
         '<span class="tile-art" style="--t-bg:' + i.bg + ";--t-fg:" + i.fg + '" aria-hidden="true"></span>' +
         '<div class="work-head">' +
           "<h1>『" + T.esc(w.title) + "』</h1>" +
-          '<dl class="facts"><dt>著者</dt><dd>' + T.filterLink("author", w.author) + "</dd><dt>制作年</dt><dd>" + T.filterLink("year", w.year) +
+          '<dl class="facts"><dt>著者</dt><dd>' + T.filterLink("author", w.author, T.authorHTML(w)) + "</dd><dt>制作年</dt><dd>" + T.filterLink("year", w.year) +
           "</dd><dt>ジャンル</dt><dd>" + T.esc(w.genres.join("・")) + "</dd></dl>" +
           (w.synopsis ? '<p class="synopsis">' + T.esc(w.synopsis) + "</p>" : "") +
         "</div>" +
@@ -109,18 +109,11 @@
   }).catch((err) => T.showError(content, err));
 
   /* 本文テキスト → HTML
-     ・1行＝1段落。空行は一行空き。行頭の全角スペースはそのまま字下げ。
-     ・ルビ：｜親文字《よみ》 または 漢字《よみ》（青空文庫式） */
+     ・1行＝1段落。空行は1つずつ一行空き（連続していればその数だけ）。行頭の全角スペースはそのまま字下げ。
+     ・ルビ：｜親文字《よみ》 または 漢字《よみ》（青空文庫式）、縦中横は T.lineHTML が処理する */
   function renderText(src) {
-    const KANJI = "[々〆〇ヶ\\u3400-\\u4DBF\\u4E00-\\u9FFF\\uF900-\\uFAFF]";
-    const reBar = /｜([^｜《》\n]+?)《([^《》\n]+?)》/g;
-    const reKanji = new RegExp("(" + KANJI + "+)《([^《》\\n]+?)》", "g");
-    return src.replace(/\r\n?/g, "\n").replace(/\n+$/, "").split("\n").map((line) => {
-      if (line.trim() === "") return '<p class="blank"></p>';
-      let h = T.esc(line);
-      h = h.replace(reBar, "<ruby>$1<rt>$2</rt></ruby>");
-      h = h.replace(reKanji, "<ruby>$1<rt>$2</rt></ruby>");
-      return "<p>" + h + "</p>";
-    }).join("");
+    return src.replace(/\r\n?/g, "\n").replace(/\n+$/, "").split("\n").map((line) =>
+      line.trim() === "" ? '<p class="blank"></p>' : "<p>" + T.lineHTML(line) + "</p>"
+    ).join("");
   }
 })();

@@ -213,6 +213,7 @@ img { max-width: 100%; display: block; }
    連続していればその数だけ空く */
 .text p.blank::before { content: "\3000"; }
 .text ruby rt { font-size: 0.5em; }
+.text.vertical .tcy { text-combine-upright: all; -webkit-text-combine: horizontal; }
 .text.horizontal { max-width: 36em; margin: 0 auto; }
 .text.horizontal .text-head { display: none; }
 /* 縦書き：本文欄の幅にきっちり収め、欄の中だけを横にスクロールする */
