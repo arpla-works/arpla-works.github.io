@@ -11,18 +11,5 @@
       "label": "",
       "url": ""
     }
-  },
-  {
-    "id": "ana",
-    "title": "穴にまつわる短編集",
-    "number": 2,
-    "date": "2026-11-08",
-    "bg": "#829DB8",
-    "fg": "#E7EFB6",
-    "cover": "covers/ana.jpg",
-    "distribution": {
-      "label": "",
-      "url": ""
-    }
   }
 ]

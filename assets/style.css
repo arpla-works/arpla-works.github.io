@@ -100,6 +100,17 @@ img { max-width: 100%; display: block; }
 .browse { display: flex; gap: 64px; align-items: flex-start; }
 .works { flex-grow: 1; min-width: 0; }
 .count { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
+.count-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 0 0 20px; }
+.count-row .count { margin: 0; }
+.active-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.active-filters[hidden] { display: none; }
+.active-filter {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 32px; padding: 0 12px;
+  border: 1px solid var(--ink); border-radius: 999px;
+  background: transparent; color: var(--ink);
+  font: inherit; font-size: 13px; cursor: pointer;
+}
 .empty { padding: 80px 0; font-size: 18px; color: var(--muted); }
 .grid {
   display: grid;
@@ -112,6 +123,11 @@ img { max-width: 100%; display: block; }
 
 .tile { display: flex; flex-direction: column; gap: 14px; text-decoration: none; color: var(--ink); }
 .tile:hover { color: var(--ink); }
+.tile-art-link, .tile-art-link > .tile-art { display: block; }
+.tile-art-link, .tile-title { color: var(--ink); text-decoration: none; }
+.tile-art-link:hover, .tile-title:hover { color: var(--ink); }
+.meta-link { color: inherit; text-decoration: none; }
+.meta-link:hover { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .tile-art {
   position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden;
   border-radius: 6px;

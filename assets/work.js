@@ -47,7 +47,7 @@
         '<span class="tile-art" style="--t-bg:' + i.bg + ";--t-fg:" + i.fg + '" aria-hidden="true"></span>' +
         '<div class="work-head">' +
           "<h1>『" + T.esc(w.title) + "』</h1>" +
-          '<dl class="facts"><dt>著者</dt><dd>' + T.esc(w.author) + "</dd><dt>制作年</dt><dd>" + T.esc(w.year) +
+          '<dl class="facts"><dt>著者</dt><dd>' + T.filterLink("author", w.author) + "</dd><dt>制作年</dt><dd>" + T.filterLink("year", w.year) +
           "</dd><dt>ジャンル</dt><dd>" + T.esc(w.genres.join("・")) + "</dd></dl>" +
           (w.synopsis ? '<p class="synopsis">' + T.esc(w.synopsis) + "</p>" : "") +
         "</div>" +

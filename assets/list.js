@@ -6,7 +6,12 @@
 
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  const state = { issue: params.get("issue") || "all", genre: params.get("genre") || "all", sel: null };
+  const state = {
+    issue: params.get("issue") || "all", genre: params.get("genre") || "all",
+    author: params.get("author") || "all", year: params.get("year") || "all", sel: null,
+  };
+  const FILTER_KEYS = ["issue", "genre", "author", "year"];
+  const FILTER_LABELS = { author: "著者", year: "制作年" };
 
   let D, ordered, genres;
 
@@ -25,6 +30,16 @@
 
     if (state.issue !== "all" && !D.issueById[state.issue]) state.issue = "all";
     if (state.genre !== "all" && !(state.genre in count)) state.genre = "all";
+    if (state.author !== "all" && !D.works.some((w) => w.author === state.author)) state.author = "all";
+    if (state.year !== "all" && !D.works.some((w) => String(w.year) === state.year)) state.year = "all";
+
+    // 著者・制作年のリンク（タイルの説明行と右側の欄）は、ページを移らずにその場で絞り込む
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest("a.meta-link[data-filter]");
+      if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      setFilter(a.dataset.filter, a.dataset.value);
+    });
 
     renderIssues();
     render();
@@ -33,8 +48,7 @@
   function setFilter(key, value) {
     state[key] = value;
     const p = new URLSearchParams();
-    if (state.issue !== "all") p.set("issue", state.issue);
-    if (state.genre !== "all") p.set("genre", state.genre);
+    FILTER_KEYS.forEach((k) => { if (state[k] !== "all") p.set(k, state[k]); });
     const q = p.toString();
     history.replaceState(null, "", q ? "?" + q : location.pathname);
     render();
@@ -71,9 +85,12 @@
     // 作品
     const list = ordered.filter((w) =>
       (state.issue === "all" || w.issue === state.issue) &&
-      (state.genre === "all" || w.genres.indexOf(state.genre) >= 0));
+      (state.genre === "all" || w.genres.indexOf(state.genre) >= 0) &&
+      (state.author === "all" || w.author === state.author) &&
+      (state.year === "all" || String(w.year) === state.year));
 
     $("count").textContent = list.length + " 作品";
+    renderActiveFilters();
     $("empty").hidden = list.length > 0;
     $("grid").innerHTML = list.map((w) => "<li>" + T.tileHTML(w, D.issueById[w.issue]) + "</li>").join("");
 
@@ -81,15 +98,32 @@
     markSelected();
     renderPreview();
 
-    $("grid").querySelectorAll(".tile").forEach((a) => {
+    $("grid").querySelectorAll(".tile-art-link, .tile-title").forEach((a) => {
       a.addEventListener("click", (e) => {
         if (!wide.matches) return;          // 狭い画面はそのまま作品ページへ
         e.preventDefault();
-        state.sel = a.dataset.id;
+        state.sel = a.closest(".tile").dataset.id;
         markSelected();
         renderPreview();
       });
     });
+  }
+
+  // 著者・制作年で絞り込んでいる間だけ、作品数の横に解除用のチップを出す
+  function renderActiveFilters() {
+    const el = $("active-filters");
+    el.innerHTML = "";
+    ["author", "year"].forEach((k) => {
+      if (state[k] === "all") return;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "active-filter";
+      b.setAttribute("aria-label", FILTER_LABELS[k] + "「" + state[k] + "」の絞り込みを解除");
+      b.innerHTML = T.esc(FILTER_LABELS[k] + "：" + state[k]) + '<span aria-hidden="true">×</span>';
+      b.addEventListener("click", () => setFilter(k, "all"));
+      el.appendChild(b);
+    });
+    el.hidden = !el.children.length;
   }
 
   function markSelected() {
@@ -115,7 +149,7 @@
       "</div>" +
       '<div class="preview-body">' +
         "<h2>『" + T.esc(w.title) + "』</h2>" +
-        '<dl class="facts"><dt>著者</dt><dd>' + T.esc(w.author) + "</dd><dt>制作年</dt><dd>" + T.esc(w.year) +
+        '<dl class="facts"><dt>著者</dt><dd>' + T.filterLink("author", w.author) + "</dd><dt>制作年</dt><dd>" + T.filterLink("year", w.year) +
         "</dd><dt>ジャンル</dt><dd>" + T.esc(w.genres.join("・")) + "</dd></dl>" +
         (w.synopsis ? '<p class="synopsis">' + T.esc(w.synopsis) + "</p>" : "") +
       "</div>" +

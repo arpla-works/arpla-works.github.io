@@ -1,159 +1,95 @@
 [
   {
-    "id": "w01",
+    "id": "ai-01",
     "issue": "ai",
-    "title": "Sun",
-    "author": "[著者名]",
-    "year": 2026,
-    "genres": [
-      "幻想"
-    ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w01.txt",
-    "bodyMode": "full"
-  },
-  {
-    "id": "w07",
-    "issue": "ana",
     "title": "ヤドカリ夫婦",
     "author": "鳥居骨丸",
     "year": 2026,
     "genres": [
-      "ミステリー"
-    ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w07.txt",
-    "bodyMode": "full"
-  },
-  {
-    "id": "w02",
-    "issue": "ai",
-    "title": "Literature",
-    "author": "[著者名]",
-    "year": 2026,
-    "genres": [
-      "実験"
-    ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w02.txt",
-    "bodyMode": "full"
-  },
-  {
-    "id": "w03",
-    "issue": "ai",
-    "title": "寝正月",
-    "author": "[著者名]",
-    "year": 2026,
-    "genres": [
-      "私小説"
-    ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w03.txt",
-    "bodyMode": "full"
-  },
-  {
-    "id": "w08",
-    "issue": "ana",
-    "title": "太陽の音",
-    "author": "[著者名]",
-    "year": 2026,
-    "genres": [
+      "ミステリー",
       "幻想"
     ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w08.txt",
+    "synopsis": "「妻がヤドカリになりました。しかも武装しています」――名探偵のふりをしてひと稼ぎしようと目論んだ「わたし」のもとに、殻にとじこもった妻の謎を解いてほしいという依頼が舞い込む。ヤドカリ博士だった天才の妻は、なぜヤドカリになったのか。",
+    "body": "texts/ai-01.txt",
     "bodyMode": "full"
   },
   {
-    "id": "w04",
+    "id": "ai-02",
     "issue": "ai",
-    "title": "[作品名]",
-    "author": "[著者名]",
+    "title": "鎖を解く風",
+    "author": "森かくり",
     "year": 2026,
     "genres": [
       "恋愛"
     ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w04.txt",
+    "synopsis": "退屈な書類仕事に倦んでいた書記官のトムは、一週間だけ職場にやって来た令嬢マーガレットに心を奪われる。だが彼女には、評判の悪い名家の次男との政略的な婚約があった。彼女を縛る鎖を解こうとするトムの恋の行方。",
+    "body": "texts/ai-02.txt",
     "bodyMode": "full"
   },
   {
-    "id": "w09",
-    "issue": "ana",
-    "title": "Moon",
-    "author": "[著者名]",
-    "year": 2026,
-    "genres": [
-      "実験"
-    ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w09.txt",
-    "bodyMode": "full"
-  },
-  {
-    "id": "w10",
-    "issue": "ana",
-    "title": "[作品名]",
-    "author": "[著者名]",
-    "year": 2026,
-    "genres": [
-      "ミステリー"
-    ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w10.txt",
-    "bodyMode": "full"
-  },
-  {
-    "id": "w05",
+    "id": "ai-03",
     "issue": "ai",
-    "title": "[作品名]",
-    "author": "[著者名]",
+    "title": "破局の一手",
+    "author": "安田智也",
     "year": 2026,
     "genres": [
-      "ミステリー"
+      "歴史"
     ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w05.txt",
+    "synopsis": "古書店で見つかった架空の軍記『戸茂国軍記』を題材にした戦国の物語。北の名門・石川家の討伐を命じられた家中で、古い家柄を重んじる老臣・山門彦右衛門は、変わりゆく時代と主君のはざまで「捨て石」となっていく。",
+    "body": "texts/ai-03.txt",
     "bodyMode": "full"
   },
   {
-    "id": "w11",
-    "issue": "ana",
-    "title": "[作品名]",
-    "author": "[著者名]",
-    "year": 2026,
-    "genres": [
-      "私小説"
-    ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w11.txt",
-    "bodyMode": "full"
-  },
-  {
-    "id": "w12",
-    "issue": "ana",
-    "title": "[作品名]",
-    "author": "[著者名]",
-    "year": 2026,
-    "genres": [
-      "恋愛"
-    ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w12.txt",
-    "bodyMode": "full"
-  },
-  {
-    "id": "w06",
+    "id": "ai-04",
     "issue": "ai",
-    "title": "[作品名]",
-    "author": "[著者名]",
+    "title": "老莱子",
+    "author": "香川まこと",
     "year": 2026,
     "genres": [
-      "恋愛",
       "幻想"
     ],
-    "synopsis": "[あらすじ・作品紹介]",
-    "body": "texts/w06.txt",
+    "synopsis": "春秋時代、仕官の道が開けぬまま七十歳になった天気魔術師・老莱子。雨乞いに応えた龍神と約束を交わすが、彼を幼子のように溺愛する老父母、そして楚王からの使いが、その運命を大きく狂わせていく。",
+    "body": "texts/ai-04.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "ai-05",
+    "issue": "ai",
+    "title": "唾棄すべき物について",
+    "author": "水泰惺",
+    "year": 2026,
+    "genres": [
+      "思想"
+    ],
+    "synopsis": "悪、醜、そして死――この世に確かに存在する「唾棄すべきもの」は、なぜ存在するのか。旧字旧仮名で綴られる思索は、それらを批判し、軽蔑し、そして究極的には愛することを通して、その正体に迫っていく。",
+    "body": "texts/ai-05.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "ai-06",
+    "issue": "ai",
+    "title": "唖教",
+    "author": "歩理詞",
+    "year": 2026,
+    "genres": [
+      "SF",
+      "ホラー"
+    ],
+    "synopsis": "新ソ連崩壊のきっかけとなった「唖教事件」の真相を追い、ニューメキシコの町を訪れた記者の「俺」。元秘密警察の男がついに真相を語りかけたその瞬間、一匹の鼠が鳴いた――。架空の現代史を舞台に、教団の謎をめぐる物語。",
+    "body": "texts/ai-06.txt",
+    "bodyMode": "full"
+  },
+  {
+    "id": "ai-07",
+    "issue": "ai",
+    "title": "僕と犬と三日間の旅路",
+    "author": "西瓜彗星光",
+    "year": 2026,
+    "genres": [
+      "幻想"
+    ],
+    "synopsis": "家族が旅行で留守にする三日間、散らかった冷蔵庫を勝手に片づけた「僕」は、庭で眠りに落ち、不思議な夢の世界へと旅立つ。犬の吠え声とともにめぐる、奇妙な三日間の旅。",
+    "body": "texts/ai-07.txt",
     "bodyMode": "full"
   }
 ]

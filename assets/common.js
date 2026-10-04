@@ -64,15 +64,25 @@
     return "文芸同人誌" + issue.number + "号　" + formatDate(issue.date);
   }
 
-  /* 正方形タイル（円）。href を渡すとリンクになる */
+  /* 著者・制作年の絞り込みリンク（index.html?author=… / ?year=…）。
+     一覧ページでは list.js がクリックを受けて、ほかの絞り込みと掛け合わせる */
+  function filterLink(key, value) {
+    return '<a class="meta-link" href="index.html?' + key + "=" + encodeURIComponent(value) +
+      '" data-filter="' + key + '" data-value="' + esc(value) + '">' + esc(value) + "</a>";
+  }
+
+  /* 正方形タイル（円）。絵と作品名が作品ページへのリンク、説明行はリンクの外 */
   function tileHTML(work, issue, opts) {
     opts = opts || {};
+    const href = "work.html?id=" + encodeURIComponent(work.id);
     const style = "--t-bg:" + issue.bg + ";--t-fg:" + issue.fg;
     const meta = opts.hideMeta ? "" :
-      '<span class="tile-meta">' + esc(work.author) + "　／　" + esc(work.genres.join("・")) + "</span>";
-    return '<a class="tile" href="work.html?id=' + encodeURIComponent(work.id) + '" data-id="' + esc(work.id) + '">' +
-      '<span class="tile-art" style="' + style + '" aria-hidden="true"></span>' +
-      '<span class="tile-cap"><span class="tile-title">' + esc(work.title) + "</span>" + meta + "</span></a>";
+      '<span class="tile-meta">' + filterLink("author", work.author) + "　" + filterLink("year", work.year) +
+      "　／　" + esc(work.genres.join("・")) + "</span>";
+    return '<div class="tile" data-id="' + esc(work.id) + '">' +
+      '<a class="tile-art-link" href="' + href + '" tabindex="-1" aria-hidden="true">' +
+      '<span class="tile-art" style="' + style + '"></span></a>' +
+      '<span class="tile-cap"><a class="tile-title" href="' + href + '">' + esc(work.title) + "</a>" + meta + "</span></div>";
   }
 
   function shuffle(arr) {
@@ -89,5 +99,5 @@
       "<br>ファイルを直接開いている場合は、ローカルサーバー経由で表示してください（README参照）。</p>";
   }
 
-  window.Tanpen = { loadAll, esc, formatDate, issueMeta, tileHTML, shuffle, showError };
+  window.Tanpen = { loadAll, esc, formatDate, issueMeta, filterLink, tileHTML, shuffle, showError };
 })();
