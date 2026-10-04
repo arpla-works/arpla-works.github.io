@@ -8,7 +8,10 @@
 やること:
   - 作品ごとに texts/<issue>-01.txt, -02.txt … を書き出す（既存ファイルは上書き）
   - data/works.json の、その号（--issue）の作品をすべて置き換える（他の号の作品はそのまま）
-    ※ ジャンルとあらすじは空で作る。あとで必ず埋めること（check.py がエラーにする）
+    ※ 同じIDの作品がすでにあれば、著者名・制作年・ジャンル・あらすじ・公開範囲はそちらを引き継ぐ
+      （仮の値「[...]」や空欄は引き継がない。作品名が仮の値のサンプル作品からは何も引き継がない）。
+      本文と作品名は原稿から作り直す。並び順は元の位置を保ち、新しい作品は末尾に足す
+    ※ 新しい作品のジャンルとあらすじは空で作る。あとで必ず埋めること（check.py がエラーにする）
 
 作品の区切りの見つけ方:
   - 段落スタイル名が「タイトル」の段落＝作品名、その直後の「著者」スタイルの段落＝著者名
@@ -17,8 +20,10 @@
   - 最後の作品は、奥付（改ページ後に「発行」を含む行が続く箇所）の手前で終わる
 
 変換のきまり（サイトの本文形式に合わせる）:
-  - 1段落＝1行。空段落は一行空き（連続する空行は1つにまとめる）
-  - 原稿で字下げされている段落（地の文など）は行頭に全角スペースを1つ付ける。字下げのない段落（会話文など）と章節見出しには付けない
+  - 1段落＝1行。空段落は一行空き（連続していてもそのまま残す）
+  - 段落の前後に一行分以上の空き（段落前後の間隔）があれば一行空きにする（章節見出しの前など）
+  - 改ページは反映しない（紙面の都合の切れ目とみなす）。空きが必要な箇所は data/import_rules.json で作品ごとに指定する
+  - 原稿で字下げされている段落は、字下げの文字数（左インデント＋1行目インデント）だけ行頭に全角スペースを付ける。章節見出しも同様。作品名・著者名の行は対象外
   - Wordのルビ（ルビ機能／EQフィールドの両方）は ｜親文字《よみ》 に変換する
   - 文字ボックスは、Wordが互換用に二重に持っている片方（Fallback）を無視して1回だけ取り出す
   - タブは全角スペースに置き換える
@@ -30,7 +35,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 MC = "{http://schemas.openxmlformats.org/markup-compatibility/2006}"
 EQ_RUBY = re.compile(r"\\o\s*\\ad\s*\(\s*\\s\s*\\up\s*-?\d+\s*\((.*?)\)\s*,(.*)\)\s*$", re.S)
-NOINDENT_STYLE_NAMES = {"章節", "タイトル", "著者"}
+NOINDENT_STYLE_NAMES = {"タイトル", "著者"}
 
 
 def load(docx):
@@ -49,7 +54,9 @@ def style_table(styles):
         name = s.find(W + "name")
         base = s.find(W + "basedOn")
         ind = s.find(".//" + W + "ind")
+        sp = s.find(".//" + W + "spacing")
         table[sid] = {
+            "spacing": {k[len(W):]: v for k, v in sp.attrib.items()} if sp is not None else {},
             "name": name.get(W + "val") if name is not None else "",
             "base": base.get(W + "val") if base is not None else None,
             "ind": {k[len(W):]: v for k, v in ind.attrib.items()} if ind is not None else {},
@@ -57,17 +64,33 @@ def style_table(styles):
     return table
 
 
-def style_first_line(table, sid):
+def style_attr(table, sid, group, keys):
+    """スタイルを basedOn でさかのぼり、keys の属性値を集める（近いスタイルの値を優先）"""
+    found = {}
     for _ in range(10):
         if not sid or sid not in table:
-            return 0
-        ind = table[sid]["ind"]
-        if "firstLineChars" in ind:
-            return int(ind["firstLineChars"])
-        if "firstLine" in ind:
-            return int(ind["firstLine"])
+            break
+        for k in keys:
+            if k not in found and k in table[sid][group]:
+                found[k] = table[sid][group][k]
         sid = table[sid]["base"]
-    return 0
+    return found
+
+
+IND_KEYS = ("left", "leftChars", "start", "startChars", "firstLine", "firstLineChars", "hanging", "hangingChars")
+
+
+def indent_chars(ind):
+    """段落の1行目の字下げ量を「文字数」で返す（左インデント＋1行目インデント）"""
+    def amount(chars_key, twips_key):
+        if chars_key in ind:
+            return int(ind[chars_key]) / 100
+        if twips_key in ind:
+            return int(ind[twips_key]) / 210  # 10.5pt 前後の本文を想定した概算
+        return 0
+    left = amount("leftChars", "left") or amount("startChars", "start")
+    first = amount("firstLineChars", "firstLine") - amount("hangingChars", "hanging")
+    return max(0, round(left + first))
 
 
 def parents_of(root):
@@ -93,7 +116,7 @@ def plain(el):
 
 
 def extract(doc, table):
-    """本文の段落を [(text, style_name, indent, page_break)] で返す"""
+    """本文の段落を、文字列・スタイル名・字下げ・段落前後の空き・改ページの情報とともに返す"""
     body = doc.find(W + "body")
     parent = parents_of(body)
     paras = []
@@ -137,25 +160,29 @@ def extract(doc, table):
                         parts.append("\n")
         ppr = p.find(W + "pPr")
         sid = None
-        explicit = {}
+        explicit_ind, explicit_sp = {}, {}
         if ppr is not None:
             ps = ppr.find(W + "pStyle")
             sid = ps.get(W + "val") if ps is not None else None
             ind = ppr.find(W + "ind")
             if ind is not None:
-                explicit = {k[len(W):]: v for k, v in ind.attrib.items()}
-        if "firstLineChars" in explicit:
-            first = int(explicit["firstLineChars"])
-        elif "firstLine" in explicit:
-            first = int(explicit["firstLine"])
-        else:
-            first = style_first_line(table, sid)
-        if "hanging" in explicit or "hangingChars" in explicit:
-            first = 0
+                explicit_ind = {k[len(W):]: v for k, v in ind.attrib.items()}
+            sp = ppr.find(W + "spacing")
+            if sp is not None:
+                explicit_sp = {k[len(W):]: v for k, v in sp.attrib.items()}
+        ind = style_attr(table, sid, "ind", IND_KEYS)
+        # 段落に直接書かれた値で上書きする（「文字数」指定が twips 指定より優先されるのは indent_chars 側で扱う）
+        ind.update(explicit_ind)
+        sp = style_attr(table, sid, "spacing", ("before", "beforeLines", "after", "afterLines"))
+        sp.update(explicit_sp)
+        before = int(sp.get("before", 0)) if not sp.get("beforeLines") else int(sp["beforeLines"]) * 2.4
+        after = int(sp.get("after", 0)) if not sp.get("afterLines") else int(sp["afterLines"]) * 2.4
         name = table.get(sid, {}).get("name", "") if sid else ""
         page_break = any(b.get(W + "type") == "page" for b in p.iter(W + "br")) or \
-            (ppr is not None and (ppr.find(W + "sectPr") is not None or ppr.find(W + "pageBreakBefore") is not None))
-        paras.append(("".join(parts), name, first > 0 and name not in NOINDENT_STYLE_NAMES, page_break))
+            (ppr is not None and ppr.find(W + "sectPr") is not None)
+        break_before = ppr is not None and ppr.find(W + "pageBreakBefore") is not None
+        paras.append({"text": "".join(parts), "style": name, "indent": indent_chars(ind),
+                      "before": before, "after": after, "page_break": page_break, "break_before": break_before})
     return paras
 
 
@@ -164,23 +191,24 @@ def find_works(paras, titles=None, author_line=True):
     if titles:
         pos = 0
         for t in titles:
-            cand = [k for k in range(pos, len(paras)) if paras[k][0].strip() == t]
+            cand = [k for k in range(pos, len(paras)) if paras[k]["text"].strip() == t]
             if not cand:
                 sys.exit(f"作品名「{t}」が本文に見つかりません")
             # 目次の行と区別するため、直後の段落が別の作品名でない最初の出現を使う
-            i = next((k for k in cand if not any(paras[k + d][0].strip() in titles for d in (1, 2, 3) if k + d < len(paras))), cand[0])
-            nxt = next((j for j in range(i + 1, len(paras)) if paras[j][0].strip()), i + 1)
-            author = paras[nxt][0].strip() if author_line else ""
+            i = next((k for k in cand if not any(paras[k + d]["text"].strip() in titles for d in (1, 2, 3) if k + d < len(paras))), cand[0])
+            nxt = next((j for j in range(i + 1, len(paras)) if paras[j]["text"].strip()), i + 1)
+            author = paras[nxt]["text"].strip() if author_line else ""
             starts.append((i, t, author, (nxt - i + 1) if author_line else 1))
             pos = i + 1
     else:
-        for i, (txt, name, _, _) in enumerate(paras):
-            if name == "タイトル" and txt.strip():
+        for i, para in enumerate(paras):
+            txt = para["text"]
+            if para["style"] == "タイトル" and txt.strip():
                 j = i + 1
-                while j < len(paras) and not paras[j][0].strip():
+                while j < len(paras) and not paras[j]["text"].strip():
                     j += 1
-                if j < len(paras) and paras[j][1] == "著者":
-                    starts.append((i, txt.strip(), paras[j][0].strip(), j - i + 1))
+                if j < len(paras) and paras[j]["style"] == "著者":
+                    starts.append((i, txt.strip(), paras[j]["text"].strip(), j - i + 1))
                 else:
                     starts.append((i, txt.strip(), "", 1))
         # 表紙の書名など、本文の作品でない「タイトル」は著者がないので除外
@@ -190,10 +218,10 @@ def find_works(paras, titles=None, author_line=True):
     # 奥付の位置：最後の作品のあと、改ページの直後数行に「発行」がある箇所
     end = len(paras)
     for k in range(starts[-1][0] + 1, len(paras)):
-        if paras[k][3]:
-            following = [p[0] for p in paras[k + 1:k + 8] if p[0].strip()]
+        if paras[k]["page_break"]:
+            following = [p["text"] for p in paras[k + 1:k + 8] if p["text"].strip()]
             if any("発行" in t for t in following[:5]):
-                end = k + 1 if paras[k][0].strip() else k
+                end = k + 1 if paras[k]["text"].strip() else k
                 break
     works = []
     for n, (i, title, author, skip) in enumerate(starts):
@@ -202,23 +230,61 @@ def find_works(paras, titles=None, author_line=True):
     return works
 
 
+LINE = 240        # 段落前後の空き（twips）がこれ以上なら一行空きとみなす
+PAGE_BLANKS = 0   # 改ページは反映しない（必要な空きは data/import_rules.json で個別に指定する）
+
+
 def to_text(chunk):
     lines = []
-    for txt, name, indent, _ in chunk:
-        txt = txt.replace("\t", "　").rstrip()
+
+    def blank(n=1):
+        for _ in range(n):
+            lines.append("")
+
+    def ensure_blank():
+        if lines and lines[-1] != "":
+            lines.append("")
+
+    for para in chunk:
+        txt = para["text"].replace("\t", "　").rstrip()
+        if para["break_before"]:
+            blank(PAGE_BLANKS)
+        if para["before"] >= LINE * 0.9:
+            ensure_blank()
         if not txt.strip():
-            if lines and lines[-1] != "":
-                lines.append("")
-            continue
-        for k, line in enumerate(txt.split("\n")):
-            line = line.rstrip()
-            if k == 0 and indent and not line.startswith("　"):
-                line = "　" + line
-            lines.append(line)
+            blank()   # 空段落はそのまま一行空き（連続しても詰めない）
+        else:
+            for k, line in enumerate(txt.split("\n")):
+                line = line.rstrip()
+                if k == 0 and para["indent"] and para["style"] not in NOINDENT_STYLE_NAMES:
+                    lead = len(line) - len(line.lstrip("　 "))
+                    if lead < para["indent"]:
+                        line = "　" * (para["indent"] - lead) + line.lstrip("　 ")
+                lines.append(line)
+            if para["after"] >= LINE * 0.9:
+                ensure_blank()
+        if para["page_break"]:
+            blank(PAGE_BLANKS)
     while lines and lines[-1] == "":
         lines.pop()
     while lines and lines[0] == "":
         lines.pop(0)
+    return "\n".join(lines) + "\n"
+
+
+def apply_rules(wid, text, rules):
+    """data/import_rules.json の個別指定を本文に適用する。
+    形式: {"ai-06": [{"after": "行に含まれる文字列", "blank": 30}, ...]}
+    "after" を含む行（本文中で1行だけに一致すること）の直後の空行を、ちょうど "blank" 行にする。"""
+    lines = text.rstrip("\n").split("\n")
+    for rule in rules.get(wid, []):
+        hits = [i for i, l in enumerate(lines) if rule["after"] in l]
+        if len(hits) != 1:
+            sys.exit(f"{wid}: 指定「{rule['after']}」に一致する行が {len(hits)} 行あります（1行だけに一致するよう指定してください）")
+        i = hits[0] + 1
+        while i < len(lines) and lines[i] == "":
+            del lines[i]
+        lines[i:i] = [""] * int(rule["blank"])
     return "\n".join(lines) + "\n"
 
 
@@ -238,6 +304,9 @@ def main():
         sys.exit(f"号 '{a.issue}' が data/issues.json にありません。先に号を追加してください")
     year = a.year or int(issue["date"][:4])
 
+    rules_path = os.path.join(ROOT, "data", "import_rules.json")
+    rules = json.load(open(rules_path, encoding="utf-8")) if os.path.exists(rules_path) else {}
+
     doc, styles = load(a.docx)
     paras = extract(doc, style_table(styles))
     titles = [t.strip() for t in a.titles.split(",")] if a.titles else None
@@ -247,7 +316,7 @@ def main():
     for n, (title, author, chunk) in enumerate(works, 1):
         author = re.sub(r"｜([^《]+)《[^》]+》", r"\1", author)  # 著者名のルビは外す
         wid = f"{a.issue}-{n:02d}"
-        text = to_text(chunk)
+        text = apply_rules(wid, to_text(chunk), rules)
         rubies = len(re.findall(r"｜[^《]+《[^》]+》", text))
         print(f"{wid}  {title}  ／  {author or '（著者不明）'}  {len(text)}字  ルビ{rubies}")
         print("      先頭:", text.split("\n", 1)[0][:40])
@@ -263,11 +332,45 @@ def main():
         return
     path = os.path.join(ROOT, "data", "works.json")
     current = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else []
-    keep = [w for w in current if w.get("issue") != a.issue]
+    before = {w.get("id"): w for w in current}
+
+    def real(v):
+        """空欄や仮の値（[作品名] など）でなければ True"""
+        if v in (None, "", []):
+            return False
+        items = v if isinstance(v, list) else [v]
+        return not any(isinstance(x, str) and x.startswith("[") and x.endswith("]") for x in items)
+
+    kept = []
+    for e in entries:
+        old = before.get(e["id"])
+        if old and real(old.get("title")):  # 作品名が仮の値のサンプル作品からは何も引き継がない
+            for k in ("author", "year", "genres", "synopsis", "bodyMode"):
+                if real(old.get(k)):
+                    e[k] = old[k]
+                    if e["id"] not in kept:
+                        kept.append(e["id"])
+            if e["bodyMode"] == "none":
+                e["bodyMode"] = "full"  # 本文を取り込んだので本文ありにする
+    if kept:
+        print("既存の作品データ（著者名・ジャンル・あらすじなど）を引き継いだ作品:", ", ".join(kept))
+    # 並び順を保つ：同じIDの作品は元の位置に置き換え、なくなった作品は外し、新しい作品は末尾に足す
+    new_by_id = {e["id"]: e for e in entries}
+    result, placed = [], set()
+    for w in current:
+        if w.get("issue") != a.issue:
+            result.append(w)
+        elif w.get("id") in new_by_id:
+            result.append(new_by_id[w["id"]])
+            placed.add(w["id"])
+    result += [e for e in entries if e["id"] not in placed]
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(keep + entries, f, ensure_ascii=False, indent=2)
+        json.dump(result, f, ensure_ascii=False, indent=2)
         f.write("\n")
-    print(f"data/works.json：{a.issue} の作品を {len(entries)} 件で置き換えました。ジャンルとあらすじを埋めてください")
+    print(f"data/works.json：{a.issue} の作品を {len(entries)} 件で更新しました。")
+    todo = [e["id"] for e in entries if not real(e["genres"]) or not real(e["synopsis"])]
+    if todo:
+        print("ジャンルまたはあらすじが未記入の作品（埋めること）:", ", ".join(todo))
 
 
 if __name__ == "__main__":

@@ -209,7 +209,9 @@ img { max-width: 100%; display: block; }
 
 .text { font-size: 18px; line-height: 2; letter-spacing: 0.02em; }
 .text p { margin: 0; }
-.text p.blank { block-size: 1em; }  /* 論理プロパティなので縦書きでも一行空きになる */
+/* 空行：全角スペース1字の「中身のある1行」として描くので、横書き・縦書きとも本文1行分の空きになる。
+   連続していればその数だけ空く */
+.text p.blank::before { content: "\3000"; }
 .text ruby rt { font-size: 0.5em; }
 .text.horizontal { max-width: 36em; margin: 0 auto; }
 .text.horizontal .text-head { display: none; }
